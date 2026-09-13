@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: wallet-app
+
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://dpg-dajcusbm8hqs73fqam80-a/wallet_ul3e
+    driver-class-name: org.postgresql.Driver
+    username: walletdbadmin
+    password: TRC1ELiU6tM0rqXteEia9XTy8Pdnmnex
+    hikari:
+      maximum-pool-size: 200
+      minimum-idle: 10
+      connection-timeout: 10000
+      idle-timeout: 30000
+      max-lifetime: 600000
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE   # shows bound parameter values in SQL logs
+    org.springframework.security: DEBUG
+
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
