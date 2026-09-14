@@ -6,10 +6,10 @@ spring:
     active: dev
 
   datasource:
-    url: jdbc:postgresql://dpg-dajcusbm8hqs73fqam80-a/wallet_ul3e
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-    username: walletdbadmin
-    password: TRC1ELiU6tM0rqXteEia9XTy8Pdnmnex
     hikari:
       maximum-pool-size: 200
       minimum-idle: 10
