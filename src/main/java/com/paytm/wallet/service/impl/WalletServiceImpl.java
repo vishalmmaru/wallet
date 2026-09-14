@@ -5,6 +5,9 @@ import com.paytm.wallet.model.exceptions.ResourceNotFoundException;
 import com.paytm.wallet.model.request.WalletRequest;
 import com.paytm.wallet.repository.WalletRepository;
 import com.paytm.wallet.service.WalletService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,10 +17,29 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class WalletServiceImpl implements WalletService {
 
     private final WalletRepository walletRepository;
+    private final MeterRegistry meterRegistry;
+
+    private Counter walletsCreatedCounter;
+    private Counter walletCreateRaceLostCounter;
+
+    public WalletServiceImpl(WalletRepository walletRepository, MeterRegistry meterRegistry) {
+        this.walletRepository = walletRepository;
+        this.meterRegistry = meterRegistry;
+    }
+
+    @PostConstruct
+    void initMetrics() {
+        walletsCreatedCounter = Counter.builder("wallet.wallets.created")
+                .description("Number of new wallets created")
+                .register(meterRegistry);
+
+        walletCreateRaceLostCounter = Counter.builder("wallet.wallets.create_race_lost")
+                .description("Number of get-or-create calls that lost the creation race and fell back to lookup")
+                .register(meterRegistry);
+    }
 
     @Override
     public Wallet getOrCreateWallet(WalletRequest walletRequest) {
@@ -30,10 +52,12 @@ public class WalletServiceImpl implements WalletService {
 
         try {
             Wallet created = walletRepository.saveAndFlush(new Wallet(walletRequest.getUserId(), walletRequest.getAmount()));
+            walletsCreatedCounter.increment();
             log.info("event=wallet_created walletId={} userId={} initialBalance={}",
                     created.getId(), walletRequest.getUserId(), walletRequest.getAmount());
             return created;
         } catch (DataIntegrityViolationException e) {
+            walletCreateRaceLostCounter.increment();
             log.warn("event=wallet_create_race_lost userId={} falling back to existing wallet lookup",
                     walletRequest.getUserId());
             return walletRepository.findByUserId(walletRequest.getUserId())
