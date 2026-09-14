@@ -36,7 +36,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"
 
 server:
-  port: 8080
+  port: ${PORT:8080}
   tomcat:
     threads:
       max: 200
