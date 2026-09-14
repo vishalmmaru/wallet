@@ -1,4 +1,4 @@
-package com.paytm.wallet.security;
+package com.paytm.wallet.filter;
 
 import com.paytm.wallet.repository.UserRepository;
 import jakarta.servlet.FilterChain;

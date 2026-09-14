@@ -7,9 +7,11 @@ import com.paytm.wallet.model.exceptions.MissingIdempotencyKeyException;
 import com.paytm.wallet.model.request.TransactionRequest;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @AllArgsConstructor
 @Component
 public class TransactionFacade {
@@ -18,7 +20,11 @@ public class TransactionFacade {
 
     @Transactional
     public String performTransferOperations(TransactionRequest transactionRequest, String idempotencyKey) {
-        if (StringUtils.isBlank(idempotencyKey)) throw new MissingIdempotencyKeyException("idempotencyKey header is required");
+        if (StringUtils.isBlank(idempotencyKey)) {
+            log.warn("event=transfer_declined reason=missing_idempotency_key fromId={} toId={} amount={}",
+                    transactionRequest.getFromId(), transactionRequest.getToId(), transactionRequest.getAmount());
+            throw new MissingIdempotencyKeyException("idempotencyKey header is required");
+        }
 
         transactionService.validateWallets(transactionRequest);
         Transaction transaction = transactionService.createOrGetExisting(transactionRequest, idempotencyKey);

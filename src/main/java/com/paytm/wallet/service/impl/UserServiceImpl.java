@@ -4,11 +4,13 @@ import com.paytm.wallet.model.User;
 import com.paytm.wallet.repository.UserRepository;
 import com.paytm.wallet.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -18,10 +20,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(String userName) {
         Optional<User> userOptional = userRepository.findByUserName(userName);
-        if (userOptional.isPresent()) return userOptional.get();
+        if (userOptional.isPresent()) {
+            log.info("event=user_get_existing userId={} userName={}", userOptional.get().getId(), userName);
+            return userOptional.get();
+        }
+
         User newUser = new User();
         newUser.setUserName(userName.trim().toLowerCase());
         newUser.setToken(UUID.randomUUID().toString());
-        return userRepository.save(newUser);
+        User saved = userRepository.save(newUser);
+        log.info("event=user_created userId={} userName={}", saved.getId(), saved.getUserName());
+        return saved;
     }
 }

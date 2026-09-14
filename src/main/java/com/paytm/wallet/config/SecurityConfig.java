@@ -1,6 +1,7 @@
 package com.paytm.wallet.config;
 
-import com.paytm.wallet.security.BearerTokenAuthFilter;
+import com.paytm.wallet.filter.BearerTokenAuthFilter;
+import com.paytm.wallet.filter.CorrelationIdFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,13 +18,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final BearerTokenAuthFilter authFilter;
+    private final CorrelationIdFilter correlationIdFilter;
 
-    public SecurityConfig(BearerTokenAuthFilter authFilter) {
+    public SecurityConfig(BearerTokenAuthFilter authFilter, CorrelationIdFilter correlationIdFilter) {
         this.authFilter = authFilter;
+        this.correlationIdFilter = correlationIdFilter;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http){
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -31,6 +34,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(correlationIdFilter, BearerTokenAuthFilter.class)
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((req, res, e) ->

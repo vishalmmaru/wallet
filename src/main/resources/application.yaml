@@ -30,8 +30,10 @@ spring:
 logging:
   level:
     org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE   # shows bound parameter values in SQL logs
+    org.hibernate.orm.jdbc.bind: TRACE
     org.springframework.security: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{correlationId}] %-5level %logger{36} - %msg%n"
 
 server:
   port: 8080
