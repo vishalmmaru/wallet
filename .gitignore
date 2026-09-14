@@ -2,13 +2,10 @@
 .gradle/
 build/
 docs/
-!gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# Gradle wrapper (keep the wrapper jar & properties, ignore local caches)
 gradle-app.setting
-!gradle-wrapper.jar
 gradlew.bat.log
 
 # Spring Boot
@@ -24,7 +21,7 @@ HELP.md
 # Spring Boot DevTools
 .spring-boot-devtools.properties
 
-# Application config with secrets (adjust to your actual secret file names)
+# Application config with secrets
 application-local.yml
 application-local.properties
 application-secrets.yml
@@ -81,5 +78,7 @@ replay_pid*
 /coverage/
 *.exec
 
-# Docker (if you containerize the build)
+# Docker
 docker-compose.override.yml
+
+!gradle/wrapper/gradle-wrapper.jar
